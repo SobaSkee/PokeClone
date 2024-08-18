@@ -184,7 +184,7 @@
 </data>
  </layer>
  <objectgroup id="3" name="Entities">
-  <object id="12" name="Player" x="164.94" y="131.26">
+  <object id="12" name="Player" x="4456.94" y="3825.93">
    <properties>
     <property name="direction" value="down"/>
     <property name="pos" value="house"/>
@@ -2136,7 +2136,7 @@
     <property name="monsters" value="Atrox,Pouch"/>
    </properties>
   </object>
-  <object id="502" gid="242" x="4032" y="3008" width="64" height="64">
+  <object id="502" gid="242" x="4152" y="3109.33" width="64" height="64">
    <properties>
     <property name="biome" value="forest"/>
     <property name="level" type="int" value="10"/>
