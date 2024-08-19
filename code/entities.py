@@ -1,13 +1,42 @@
 from settings import *
 
-class Player(pygame.sprite.Sprite):
-  def __init__(self, pos, groups):
+class Entity(pygame.sprite.Sprite):
+  def __init__(self, pos, frames, groups, facing_direction):
     super().__init__(groups)
-    self.image = pygame.Surface((100, 100))
-    self.image.fill('red')
+    self.z = WORLD_LAYERS['main']
+
+    # graphics
+    self.frame_index, self.frames = 0, frames
+    self.facing_direction = facing_direction
+    #movement
+    self.direction = vector() # initially is set to zero
+    self.speed = 1500
+    # sprite setup
+    self.image = self.frames[self.get_state()][self.frame_index]
     self.rect = self.image.get_frect(center=pos)
 
-    self.direction = vector()
+  def animate(self, dt):
+    self.frame_index += ANIMATION_SPEED * dt
+    self.image = self.frames[self.get_state()][int(self.frame_index % len(self.frames[self.get_state()]))]
+
+  def get_state(self):
+    # logic
+    moving = bool(self.direction)
+    if moving:
+      if self.direction.x != 0:
+        self.facing_direction = 'right' if self.direction.x > 0 else 'left'
+      if self.direction.y != 0:
+        self.facing_direction = 'up' if self.direction.y < 0 else 'down'
+
+    return f"{self.facing_direction}{'' if moving else '_idle'}"
+
+class Player(Entity):
+  def __init__(self, pos, frames, groups, facing_direction):
+    super().__init__(pos, frames, groups, facing_direction)
+    # self.image = pygame.Surface((100, 100))
+    # self.image.fill('red')
+    # self.rect = self.image.get_frect(center=pos)
+    
   
   def input(self):
     keys = pygame.key.get_pressed()
@@ -23,8 +52,17 @@ class Player(pygame.sprite.Sprite):
     self.direction = input_vector
 
   def move(self, dt):
-    self.rect.center += self.direction * 1000 * dt # change to 250 default later
+    self.rect.center += self.direction * self.speed * dt
 
   def update(self, dt):
     self.input()
     self.move(dt)
+    self.animate(dt)
+
+class Character(Entity):
+  def __init__(self, pos, frames, groups, facing_direction):
+    super().__init__(pos, frames, groups, facing_direction)
+    self.facing_direction = facing_direction
+    self.image = self.frames[self.facing_direction][0]
+
+  
