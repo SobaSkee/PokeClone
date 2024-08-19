@@ -2,7 +2,7 @@ from settings import *
 from pytmx.util_pygame import load_pygame
 from os.path import join
 
-from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite
+from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite, CollidableSprite
 from entities import Player, Character
 from groups import AllSprites
 from support import *
@@ -14,8 +14,10 @@ class Game:
     pygame.display.set_caption("POKEMON CLONE LOL")
     self.clock = pygame.time.Clock()
 
+    # groups
     self.all_sprites = AllSprites()
     self.collision_sprites = pygame.sprite.Group()
+    self.character_sprites = pygame.sprite.Group()
 
     self.import_assets()
     self.setup(self.tmx_maps['world'], 'house')
@@ -54,7 +56,7 @@ class Game:
       if obj.name == "top":
         Sprite((obj.x, obj.y), obj.image, self.all_sprites, WORLD_LAYERS['top'])
       else:
-        Sprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
+        CollidableSprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
     
     # collision objects
     for obj in tmx_map.get_layer_by_name('Collisions'):
@@ -79,9 +81,14 @@ class Game:
         self.character = Character(
               pos=(obj.x, obj.y),
               frames=self.overworld_frames['characters'][obj.properties['graphic']],
-              groups=(self.all_sprites, self.collision_sprites),
+              groups=(self.all_sprites, self.collision_sprites, self.character_sprites),
               facing_direction=obj.properties['direction']
             )
+
+  def input(self):
+      keys = pygame.key.get_just_pressed()
+      if keys[pygame.K_SPACE]: # press the space
+        print('dialog')
 
   def run(self):
     while True:
@@ -96,12 +103,14 @@ class Game:
           exit()
       
       # game logic
+      self.input()
       self.all_sprites.update(dt)
       self.display_surface.fill('black') # we must fill the outside frame because pygame automatically draws over it
       self.all_sprites.draw(self.player.rect.center)
       # print(self.clock.get_fps())
       pygame.display.update()
 
+  
 
 if __name__ == "__main__":
   game = Game()
