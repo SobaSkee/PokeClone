@@ -56,6 +56,7 @@ class Player(Entity):
   def __init__(self, pos, frames, groups, facing_direction, collision_sprites):
     super().__init__(pos, frames, groups, facing_direction)
     self.collision_sprites = collision_sprites
+    self.noticed = False
   
   def input(self):
     keys = pygame.key.get_pressed()
@@ -137,6 +138,7 @@ class Character(Entity):
       self.start_move()
       self.can_rotate = False
       self.has_noticed = True
+      self.player_noticed = True
 
   def has_los(self):
     if vector(self.rect.center).distance_to(self.player.rect.center) < self.radius:
