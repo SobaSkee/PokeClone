@@ -1,4 +1,5 @@
 from settings import *
+from game_data import *
 from pytmx.util_pygame import load_pygame
 from os.path import join
 
@@ -6,6 +7,7 @@ from sprites import Sprite, AnimatedSprite, MonsterPatchSprite, BorderSprite, Co
 from entities import Player, Character
 from groups import AllSprites
 from support import *
+from dialog import DialogTree
 
 class Game:
   def __init__(self):
@@ -21,6 +23,8 @@ class Game:
 
     self.import_assets()
     self.setup(self.tmx_maps['world'], 'house')
+    
+    self.dialog_tree = None
 
   def import_assets(self):
     self.tmx_maps = {
@@ -32,6 +36,10 @@ class Game:
       'water': import_folder('..', 'graphics', 'tilesets', 'water'),
       'coast': coast_importer(24, 12, '..', 'graphics', 'tilesets', 'coast'),
       'characters': all_character_import('..', 'graphics', 'characters')
+    }
+
+    self.fonts = {
+      'dialog': pygame.font.Font(join('..', 'graphics', 'fonts', 'PixeloidSans.ttf'), 30)
     }
 
   def setup(self, tmx_map, player_start_pos):
@@ -82,13 +90,31 @@ class Game:
               pos=(obj.x, obj.y),
               frames=self.overworld_frames['characters'][obj.properties['graphic']],
               groups=(self.all_sprites, self.collision_sprites, self.character_sprites),
-              facing_direction=obj.properties['direction']
+              facing_direction=obj.properties['direction'],
+              character_data=TRAINER_DATA[obj.properties['character_id']]
             )
 
   def input(self):
+    if not self.dialog_tree:
       keys = pygame.key.get_just_pressed()
       if keys[pygame.K_SPACE]: # press the space
-        print('dialog')
+        for character in self.character_sprites:
+          if check_connections(100, self.player, character):
+            # block player input
+            self.player.block()
+            # entities face each other
+            character.change_facing_direction(self.player.rect.center)
+            # create dialog
+            self.create_dialog(character)
+
+  def create_dialog(self, character):
+    if not self.dialog_tree:
+      self.dialog_tree = DialogTree(character, self.player, self.all_sprites, self.fonts['dialog'], self.end_dialog)
+
+  def end_dialog(self, character):
+    self.dialog_tree = None
+    self.player.unblock()
+    
 
   def run(self):
     while True:
@@ -108,6 +134,11 @@ class Game:
       self.display_surface.fill('black') # we must fill the outside frame because pygame automatically draws over it
       self.all_sprites.draw(self.player.rect.center)
       # print(self.clock.get_fps())
+
+      # overlays
+      if self.dialog_tree:
+        self.dialog_tree.update()
+
       pygame.display.update()
 
   
