@@ -110,6 +110,7 @@ class Game:
             character.change_facing_direction(self.player.rect.center)
             # create dialog
             self.create_dialog(character)
+            character.can_rotate = False
 
   def create_dialog(self, character):
     if not self.dialog_tree:
