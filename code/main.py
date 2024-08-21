@@ -149,7 +149,7 @@ class Game:
             # create dialog
             self.create_dialog(character)
             character.can_rotate = False
-      if keys[pygame.K_RETURN]: # press the enter
+      # if keys[pygame.K_RETURN]: # press the enter
         
 
   def create_dialog(self, character):
